@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+	  <Authors>Bernd Bestel</Authors>
+	  <Description>Report (user) statistics to InfluxDB</Description>
+	  <Copyright>Bernd Bestel</Copyright>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageProjectUrl>https://github.com/berrnd/Jellyfin.Plugin.InfluxDB</PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediaBrowser.Common" Version="4.3.0.30" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="MediaBrowser.Model">
+      <HintPath>..\custom_dependencies\MediaBrowser.Model.dll</HintPath>
+    </Reference>
+	<Reference Include="MediaBrowser.Controller">
+      <HintPath>..\custom_dependencies\MediaBrowser.Controller.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
