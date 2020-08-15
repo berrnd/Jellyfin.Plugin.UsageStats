@@ -16,7 +16,7 @@ namespace Jellyfin.Plugin.InfluxDB
 {
 	public class JellyfinInfluxDB : IServerEntryPoint
 	{
-		public JellyfinInfluxDB(ISessionManager sessionManager, ILogger logger, IJsonSerializer jsonSerializer, IFileSystem fileSystem, ILibraryManager libraryManager)
+		public JellyfinInfluxDB(ISessionManager sessionManager, ILogger<JellyfinInfluxDB> logger, IJsonSerializer jsonSerializer, IFileSystem fileSystem, ILibraryManager libraryManager)
 		{
 			this.Logger = logger;
 			this.SessionManager = sessionManager;
@@ -26,7 +26,7 @@ namespace Jellyfin.Plugin.InfluxDB
 		}
 
 		private readonly ISessionManager SessionManager;
-		private readonly ILogger Logger;
+		private readonly ILogger<JellyfinInfluxDB> Logger;
 		private readonly IJsonSerializer JsonSerializer;
 		private readonly IFileSystem FileSystem;
 		private readonly ILibraryManager LibraryManager;
@@ -82,7 +82,7 @@ namespace Jellyfin.Plugin.InfluxDB
 					seriesName = ((Episode)e.Item).SeriesName;
 				}
 
-				String data = String.Format("webaccess,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"downloaded\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Name), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+				String data = String.Format("webaccess,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"downloaded\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Username), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
 				this.InfluxDbWrite(data);
 			}
 			catch (Exception ex)
@@ -139,7 +139,7 @@ namespace Jellyfin.Plugin.InfluxDB
 						seriesName = ((Episode)e.Item).SeriesName;
 					}
 
-					String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"paused\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Name), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+					String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"paused\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Username), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
 					this.InfluxDbWrite(data);
 				}
 				else if (e.IsPaused == false & this.PausedDevices.Contains(e.DeviceId))
@@ -156,7 +156,7 @@ namespace Jellyfin.Plugin.InfluxDB
 						seriesName = ((Episode)e.Item).SeriesName;
 					}
 
-					String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"resumed\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Name), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+					String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"resumed\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Username), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
 					this.InfluxDbWrite(data);
 				}
 			}
@@ -183,7 +183,7 @@ namespace Jellyfin.Plugin.InfluxDB
 					seriesName = ((Episode)e.Item).SeriesName;
 				}
 
-				String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"started\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Name), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+				String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"started\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Username), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
 				this.InfluxDbWrite(data);
 			}
 			catch (Exception ex)
@@ -209,7 +209,7 @@ namespace Jellyfin.Plugin.InfluxDB
 					seriesName = ((Episode)e.Item).SeriesName;
 				}
 
-				String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"stopped\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Name), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+				String data = String.Format("playback,client={0},device={1},media_type={2},item_name={3},user={4},series_name={5} item_size={6},action=\"stopped\"", this.InfluxDbStringValue(e.ClientName), this.InfluxDbStringValue(e.DeviceName), this.InfluxDbStringValue(e.Item.GetType().Name), this.InfluxDbStringValue(e.Item.Name), this.InfluxDbStringValue(e.Users.First().Username), this.InfluxDbStringValue(seriesName), this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
 				this.InfluxDbWrite(data);
 			}
 			catch (Exception ex)
