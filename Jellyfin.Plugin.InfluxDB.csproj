@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Common" Version="10.7.5" />
+    <PackageReference Include="Jellyfin.Common" Version="10.8.0" />
     <PackageReference Include="Jellyfin.Data" Version="10.7.5" />
   </ItemGroup>
 
