@@ -3,7 +3,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Serialization;
 using System;
 
-namespace Jellyfin.Plugin.InfluxDB
+namespace Jellyfin.Plugin.UsageStats
 {
     public class Plugin : BasePlugin<PluginConfiguration>
     {
@@ -12,11 +12,11 @@ namespace Jellyfin.Plugin.InfluxDB
             Instance = this;
         }
 
-        public override string Name => "InfluxDB";
+        public override string Name => "UsageStats";
 
         public static Plugin Instance { get; private set; }
 
-        public override string Description => "Report (user) statistics to InfluxDB";
+        public override string Description => "Collect user statistics in a MariaDB database";
 
         public PluginConfiguration PluginConfiguration => Configuration;
 

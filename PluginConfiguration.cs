@@ -1,10 +1,10 @@
 ﻿using MediaBrowser.Model.Plugins;
 using System;
 
-namespace Jellyfin.Plugin.InfluxDB
+namespace Jellyfin.Plugin.UsageStats
 {
 	public class PluginConfiguration : BasePluginConfiguration
 	{
-		public String InfluxDbWriteBaseUri { get; set; } = "http://<host>:8086/write?db=emby";
+		public String DBConnectionString { get; set; } = "Server=<Host>;Database=<Database>;User ID=<Username>;Password=<Password>";
 	}
 }
