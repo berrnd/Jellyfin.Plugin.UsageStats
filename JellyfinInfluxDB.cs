@@ -3,31 +3,29 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.IO;
-using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Jellyfin.Plugin.InfluxDB
 {
 	public class JellyfinInfluxDB : IServerEntryPoint
 	{
-		public JellyfinInfluxDB(ISessionManager sessionManager, ILogger<JellyfinInfluxDB> logger, IJsonSerializer jsonSerializer, IFileSystem fileSystem, ILibraryManager libraryManager)
+		public JellyfinInfluxDB(ISessionManager sessionManager, ILogger<JellyfinInfluxDB> logger, IFileSystem fileSystem, ILibraryManager libraryManager)
 		{
 			this.Logger = logger;
 			this.SessionManager = sessionManager;
-			this.JsonSerializer = jsonSerializer;
 			this.FileSystem = fileSystem;
 			this.LibraryManager = libraryManager;
 		}
 
 		private readonly ISessionManager SessionManager;
 		private readonly ILogger<JellyfinInfluxDB> Logger;
-		private readonly IJsonSerializer JsonSerializer;
 		private readonly IFileSystem FileSystem;
 		private readonly ILibraryManager LibraryManager;
 		private readonly List<String> PausedDevices = new List<String>();
@@ -43,7 +41,7 @@ namespace Jellyfin.Plugin.InfluxDB
 				this.SessionManager.SessionEnded += this.SessionEnded;
 				this.LibraryManager.ItemDownloaded += this.ItemDownloaded;
 
-				this.Logger.LogInformation(String.Format("Jellyfin.Plugin.InfluxDB: Started with this configuration: {0}", this.JsonSerializer.SerializeToString(Plugin.Instance.PluginConfiguration)));
+				this.Logger.LogInformation(String.Format("Jellyfin.Plugin.InfluxDB: Started with this configuration: {0}", JsonSerializer.Serialize(Plugin.Instance.PluginConfiguration)));
 			}
 			catch (Exception ex)
 			{
