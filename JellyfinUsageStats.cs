@@ -1,21 +1,20 @@
-﻿using MediaBrowser.Controller.Entities.TV;
+using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.IO;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jellyfin.Plugin.UsageStats
 {
-	public class JellyfinUsageStats : IServerEntryPoint
+	public class JellyfinUsageStats : IHostedService
 	{
 		public JellyfinUsageStats(ISessionManager sessionManager, ILogger<JellyfinUsageStats> logger, IFileSystem fileSystem, ILibraryManager libraryManager)
 		{
@@ -30,8 +29,8 @@ namespace Jellyfin.Plugin.UsageStats
 		private readonly IFileSystem FileSystem;
 		private readonly ILibraryManager LibraryManager;
 		private readonly List<String> PausedDevices = new List<String>();
-		
-		public Task RunAsync()
+
+		public Task StartAsync(CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -52,7 +51,8 @@ namespace Jellyfin.Plugin.UsageStats
 
 			return Task.CompletedTask;
 		}
-		public void Dispose()
+
+		public Task StopAsync(CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -67,6 +67,8 @@ namespace Jellyfin.Plugin.UsageStats
 			{
 				this.Logger.LogError(ex, $"Jellyfin.Plugin.UsageStats: {ex.Message}");
 			}
+
+			return Task.CompletedTask;
 		}
 
 		private void ItemDownloaded(object sender, PlaybackProgressEventArgs e)
@@ -85,11 +87,11 @@ namespace Jellyfin.Plugin.UsageStats
 				cmd.Parameters.AddWithValue("@client", e.ClientName);
 				cmd.Parameters.AddWithValue("@device", e.DeviceName);
 				cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
-                cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
-                cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
-                cmd.Parameters.AddWithValue("@series_name", seriesName);
-                cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
-                cmd.Parameters.AddWithValue("@action", "downloaded");
+				cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
+				cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
+				cmd.Parameters.AddWithValue("@series_name", seriesName);
+				cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+				cmd.Parameters.AddWithValue("@action", "downloaded");
 				this.UsageStatsWrite(cmd);
 			}
 			catch (Exception ex)
@@ -104,12 +106,12 @@ namespace Jellyfin.Plugin.UsageStats
 			{
 				this.Logger.LogInformation("Jellyfin.Plugin.UsageStats: Session ended event");
 
-                MySqlCommand cmd = new MySqlCommand("INSERT INTO session (client, device, user, action) VALUES (@client, @device, @user, @action)");
-                cmd.Parameters.AddWithValue("@client", e.SessionInfo.Client);
-                cmd.Parameters.AddWithValue("@device", e.SessionInfo.DeviceName);
-                cmd.Parameters.AddWithValue("@user", e.SessionInfo.UserName);
-                cmd.Parameters.AddWithValue("@action", "ended");
-                this.UsageStatsWrite(cmd);
+				MySqlCommand cmd = new MySqlCommand("INSERT INTO session (client, device, user, action) VALUES (@client, @device, @user, @action)");
+				cmd.Parameters.AddWithValue("@client", e.SessionInfo.Client);
+				cmd.Parameters.AddWithValue("@device", e.SessionInfo.DeviceName);
+				cmd.Parameters.AddWithValue("@user", e.SessionInfo.UserName);
+				cmd.Parameters.AddWithValue("@action", "ended");
+				this.UsageStatsWrite(cmd);
 			}
 			catch (Exception ex)
 			{
@@ -123,12 +125,12 @@ namespace Jellyfin.Plugin.UsageStats
 			{
 				this.Logger.LogInformation("Jellyfin.Plugin.UsageStats: Session started event");
 
-                MySqlCommand cmd = new MySqlCommand("INSERT INTO session (client, device, user, action) VALUES (@client, @device, @user, @action)");
-                cmd.Parameters.AddWithValue("@client", e.SessionInfo.Client);
-                cmd.Parameters.AddWithValue("@device", e.SessionInfo.DeviceName);
-                cmd.Parameters.AddWithValue("@user", e.SessionInfo.UserName);
-                cmd.Parameters.AddWithValue("@action", "started");
-                this.UsageStatsWrite(cmd);
+				MySqlCommand cmd = new MySqlCommand("INSERT INTO session (client, device, user, action) VALUES (@client, @device, @user, @action)");
+				cmd.Parameters.AddWithValue("@client", e.SessionInfo.Client);
+				cmd.Parameters.AddWithValue("@device", e.SessionInfo.DeviceName);
+				cmd.Parameters.AddWithValue("@user", e.SessionInfo.UserName);
+				cmd.Parameters.AddWithValue("@action", "started");
+				this.UsageStatsWrite(cmd);
 			}
 			catch (Exception ex)
 			{
@@ -154,16 +156,16 @@ namespace Jellyfin.Plugin.UsageStats
 						seriesName = ((Episode)e.Item).SeriesName;
 					}
 
-                    MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
-                    cmd.Parameters.AddWithValue("@client", e.ClientName);
-                    cmd.Parameters.AddWithValue("@device", e.DeviceName);
-                    cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
-                    cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
-                    cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
-                    cmd.Parameters.AddWithValue("@series_name", seriesName);
-                    cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
-                    cmd.Parameters.AddWithValue("@action", "paused");
-                    this.UsageStatsWrite(cmd);
+					MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
+					cmd.Parameters.AddWithValue("@client", e.ClientName);
+					cmd.Parameters.AddWithValue("@device", e.DeviceName);
+					cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
+					cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
+					cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
+					cmd.Parameters.AddWithValue("@series_name", seriesName);
+					cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+					cmd.Parameters.AddWithValue("@action", "paused");
+					this.UsageStatsWrite(cmd);
 				}
 				else if (e.IsPaused == false & this.PausedDevices.Contains(e.DeviceId))
 				{
@@ -179,16 +181,16 @@ namespace Jellyfin.Plugin.UsageStats
 						seriesName = ((Episode)e.Item).SeriesName;
 					}
 
-                    MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
-                    cmd.Parameters.AddWithValue("@client", e.ClientName);
-                    cmd.Parameters.AddWithValue("@device", e.DeviceName);
-                    cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
-                    cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
-                    cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
-                    cmd.Parameters.AddWithValue("@series_name", seriesName);
-                    cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
-                    cmd.Parameters.AddWithValue("@action", "resumed");
-                    this.UsageStatsWrite(cmd);
+					MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
+					cmd.Parameters.AddWithValue("@client", e.ClientName);
+					cmd.Parameters.AddWithValue("@device", e.DeviceName);
+					cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
+					cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
+					cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
+					cmd.Parameters.AddWithValue("@series_name", seriesName);
+					cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+					cmd.Parameters.AddWithValue("@action", "resumed");
+					this.UsageStatsWrite(cmd);
 				}
 			}
 			catch (Exception ex)
@@ -214,16 +216,16 @@ namespace Jellyfin.Plugin.UsageStats
 					seriesName = ((Episode)e.Item).SeriesName;
 				}
 
-                MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
-                cmd.Parameters.AddWithValue("@client", e.ClientName);
-                cmd.Parameters.AddWithValue("@device", e.DeviceName);
-                cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
-                cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
-                cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
-                cmd.Parameters.AddWithValue("@series_name", seriesName);
-                cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
-                cmd.Parameters.AddWithValue("@action", "started");
-                this.UsageStatsWrite(cmd);
+				MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
+				cmd.Parameters.AddWithValue("@client", e.ClientName);
+				cmd.Parameters.AddWithValue("@device", e.DeviceName);
+				cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
+				cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
+				cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
+				cmd.Parameters.AddWithValue("@series_name", seriesName);
+				cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+				cmd.Parameters.AddWithValue("@action", "started");
+				this.UsageStatsWrite(cmd);
 			}
 			catch (Exception ex)
 			{
@@ -248,16 +250,16 @@ namespace Jellyfin.Plugin.UsageStats
 					seriesName = ((Episode)e.Item).SeriesName;
 				}
 
-                MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
-                cmd.Parameters.AddWithValue("@client", e.ClientName);
-                cmd.Parameters.AddWithValue("@device", e.DeviceName);
-                cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
-                cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
-                cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
-                cmd.Parameters.AddWithValue("@series_name", seriesName);
-                cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
-                cmd.Parameters.AddWithValue("@action", "stopped");
-                this.UsageStatsWrite(cmd);
+				MySqlCommand cmd = new MySqlCommand("INSERT INTO playback (client, device, media_type, item_name, user, series_name, item_size, action) VALUES (@client, @device, @media_type, @item_name, @user, @series_name, @item_size, @action)");
+				cmd.Parameters.AddWithValue("@client", e.ClientName);
+				cmd.Parameters.AddWithValue("@device", e.DeviceName);
+				cmd.Parameters.AddWithValue("@media_type", e.Item.GetType().Name);
+				cmd.Parameters.AddWithValue("@item_name", e.Item.Name);
+				cmd.Parameters.AddWithValue("@user", e.Users.First().Username);
+				cmd.Parameters.AddWithValue("@series_name", seriesName);
+				cmd.Parameters.AddWithValue("@item_size", this.FileSystem.GetFileSystemInfo(e.Item.Path).Length);
+				cmd.Parameters.AddWithValue("@action", "stopped");
+				this.UsageStatsWrite(cmd);
 			}
 			catch (Exception ex)
 			{
@@ -269,12 +271,12 @@ namespace Jellyfin.Plugin.UsageStats
 		{
 			try
 			{
-                await using MySqlConnection connection = new MySqlConnection(Plugin.Instance.PluginConfiguration.DBConnectionString);
-                await connection.OpenAsync();
+				await using MySqlConnection connection = new MySqlConnection(Plugin.Instance.PluginConfiguration.DBConnectionString);
+				await connection.OpenAsync();
 
 				command.Connection = connection;
-                await command.ExecuteNonQueryAsync();
-            }
+				await command.ExecuteNonQueryAsync();
+			}
 			catch (Exception ex)
 			{
 				this.Logger.LogError(ex, $"Jellyfin.Plugin.UsageStats: {ex.Message}");
