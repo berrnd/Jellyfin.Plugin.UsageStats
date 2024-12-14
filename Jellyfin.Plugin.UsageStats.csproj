@@ -1,21 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-	  <AssemblyVersion>1.6.0.0</AssemblyVersion>
+	  <AssemblyVersion>1.7.0.0</AssemblyVersion>
 	  <Authors>Bernd Bestel</Authors>
 	  <Description>Collect user statistics in a MariaDB database</Description>
 	  <Copyright>Bernd Bestel</Copyright>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageProjectUrl>https://github.com/berrnd/Jellyfin.Plugin.UsageStats</PackageProjectUrl>
-	  <Version>1.6.0</Version>
+	  <Version>1.7.0</Version>
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Common" Version="10.9.9" />
-    <PackageReference Include="Jellyfin.Data" Version="10.9.9" />
-    <PackageReference Include="MySqlConnector" Version="2.3.7" />
+    <PackageReference Include="Jellyfin.Common" Version="10.10.3" />
+    <PackageReference Include="Jellyfin.Data" Version="10.10.3" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
