@@ -1,14 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-	  <AssemblyVersion>1.8.0.0</AssemblyVersion>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <AssemblyVersion>1.9.0.0</AssemblyVersion>
+	  <FileVersion>1.9.0.0</FileVersion>
+	  <Version>1.9.0</Version>
 	  <Authors>Bernd Bestel</Authors>
 	  <Description>Collect user statistics in a MariaDB database</Description>
 	  <Copyright>Bernd Bestel</Copyright>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageProjectUrl>https://github.com/berrnd/Jellyfin.Plugin.UsageStats</PackageProjectUrl>
-	  <Version>1.8.0</Version>
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
