@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Jellyfin.Common" Version="10.11.7" />
     <PackageReference Include="Jellyfin.Data" Version="10.11.7" />
-    <PackageReference Include="MySqlConnector" Version="2.5.0" />
+    <PackageReference Include="MySqlConnector" Version="2.6.1" />
   </ItemGroup>
 
   <ItemGroup>
